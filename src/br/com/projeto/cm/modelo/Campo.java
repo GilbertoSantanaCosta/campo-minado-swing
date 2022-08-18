@@ -3,6 +3,8 @@ package br.com.projeto.cm.modelo;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.projeto.cm.excecao.ExplosaoException;
+
 public class Campo {
 
 	private final int linha;
@@ -57,7 +59,7 @@ public class Campo {
 			aberto = true;
 			
 			if(minado) {
-				// TODO implementar nova versão 
+				throw new ExplosaoException();
 			}
 			
 			if(vizinhancaSegura()){
