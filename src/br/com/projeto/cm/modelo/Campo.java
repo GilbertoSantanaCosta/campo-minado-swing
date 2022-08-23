@@ -3,8 +3,6 @@ package br.com.projeto.cm.modelo;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.projeto.cm.excecao.ExplosaoException;
-
 public class Campo {
 
 	private final int linha;
@@ -15,13 +13,30 @@ public class Campo {
 	private boolean minado;
 	
 	private List<Campo> vizinhos = new ArrayList<Campo>();
+	private List<CampoObservador> observadores = new ArrayList<CampoObservador>();
 
+	
 	public Campo(int linha, int coluna) {
 		
 		this.linha = linha;
 		this.coluna = coluna;
 		
 	}
+	
+	
+	public void registrarObservador(CampoObservador observador) {
+		observadores.add(observador);
+	}
+	
+	
+	private void notificarEvento(CampoEvento evento) {
+		
+		observadores.stream()
+					.forEach(o -> o.eventoOcorreu(this, evento));
+	}
+	
+	
+	
 	
 	boolean adicionarVizinho(Campo vizinho) {
 		
@@ -45,10 +60,17 @@ public class Campo {
 			
 	}
 	
+	
 	void alternarMarcacao() {
 		
 		if(!aberto) {
 			marcado = !marcado;
+			
+			if(marcado) {
+				notificarEvento(CampoEvento.MARCAR);
+			}else {
+				notificarEvento(CampoEvento.DESMARCAR);
+			}
 		}
 	}
 	
@@ -56,11 +78,14 @@ public class Campo {
 		
 		if(!aberto && !marcado) {
 			
-			aberto = true;
+			
 			
 			if(minado) {
-				throw new ExplosaoException();
+				notificarEvento(CampoEvento.EXPLODIR);
+				return true;
 			}
+			
+			setAberto(aberto);
 			
 			if(vizinhancaSegura()){
 				
@@ -72,6 +97,7 @@ public class Campo {
 			return false;
 		}	
 	}
+	
 	
 	boolean vizinhancaSegura() {
 		return vizinhos.stream().noneMatch(v -> v.minado);
@@ -93,6 +119,10 @@ public class Campo {
 	
 	void setAberto(boolean aberto) {
 		this.aberto = aberto;
+		
+		if(aberto) {
+			notificarEvento(CampoEvento.ABRIR);
+		}
 	}
 
 	public boolean isMinado() {
