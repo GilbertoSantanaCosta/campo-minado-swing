@@ -145,6 +145,7 @@ public class Campo {
 		aberto = false;
 		minado = false;
 		marcado = false;
+		notificarEvento(CampoEvento.REINICIAR);
 	}
 
 	public String toString() {
